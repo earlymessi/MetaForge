@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "metaforge"
+version = "1.0.0"
+description = "MetaForge: A modular optimization framework for solving Job Shop Scheduling problems using metaheuristics and learning-based approaches."
+authors = [
+    { name = "Mageed Ghaleb", email = "mageed.ghaleb@gmail.com" }
+]
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+dependencies = [
+    "numpy",
+    "matplotlib",
+    "torch",
+    "seaborn",
+    "pandas",
+]
+
+[project.urls]
+Homepage = "https://github.com/mageed-ghaleb/metaforge"
+Repository = "https://github.com/mageed-ghaleb/metaforge"

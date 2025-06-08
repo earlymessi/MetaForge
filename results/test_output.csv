@@ -1,0 +1,64 @@
+benchmark,solver,best_score,runtime_sec
+ft06.txt,Tabu Search,60,0.03399777412414551
+ft06.txt,Genetic Algorithm,66,0.03051590919494629
+ft06.txt,Ant Colony Optimization,70,0.25966548919677734
+la01.txt,Tabu Search,78,0.0535893440246582
+la01.txt,Genetic Algorithm,84,0.04894304275512695
+la01.txt,Ant Colony Optimization,92,0.4442460536956787
+la02.txt,Tabu Search,83,0.03400897979736328
+la02.txt,Genetic Algorithm,83,0.04600811004638672
+la02.txt,Ant Colony Optimization,87,0.44713783264160156
+la03.txt,Tabu Search,67,0.03201127052307129
+la03.txt,Genetic Algorithm,77,0.04153132438659668
+la03.txt,Ant Colony Optimization,73,0.5013382434844971
+la04.txt,Tabu Search,53,0.04243922233581543
+la04.txt,Genetic Algorithm,61,0.05669260025024414
+la04.txt,Ant Colony Optimization,64,0.42618560791015625
+la05.txt,Tabu Search,180,0.07452845573425293
+la05.txt,Genetic Algorithm,194,0.11568546295166016
+la05.txt,Ant Colony Optimization,247,1.6520731449127197
+la06.txt,Tabu Search,189,0.0728912353515625
+la06.txt,Genetic Algorithm,201,0.13477277755737305
+la06.txt,Ant Colony Optimization,255,1.4427220821380615
+la07.txt,Tabu Search,190,0.08252334594726562
+la07.txt,Genetic Algorithm,200,0.12750005722045898
+la07.txt,Ant Colony Optimization,257,1.5016388893127441
+la08.txt,Tabu Search,207,0.0881338119506836
+la08.txt,Genetic Algorithm,223,0.13564634323120117
+la08.txt,Ant Colony Optimization,286,1.7848269939422607
+la09.txt,Tabu Search,218,0.08678221702575684
+la09.txt,Genetic Algorithm,226,0.13558077812194824
+la09.txt,Ant Colony Optimization,274,1.4792096614837646
+la10.txt,Tabu Search,163,0.07301497459411621
+la10.txt,Genetic Algorithm,184,0.1271975040435791
+la10.txt,Ant Colony Optimization,231,1.4767065048217773
+la11.txt,Tabu Search,162,0.08252334594726562
+la11.txt,Genetic Algorithm,180,0.12906455993652344
+la11.txt,Ant Colony Optimization,214,1.4469475746154785
+la12.txt,Tabu Search,163,0.07773113250732422
+la12.txt,Genetic Algorithm,175,0.12239241600036621
+la12.txt,Ant Colony Optimization,225,1.4932408332824707
+la13.txt,Tabu Search,162,0.0928041934967041
+la13.txt,Genetic Algorithm,168,0.12912225723266602
+la13.txt,Ant Colony Optimization,233,1.5031840801239014
+la14.txt,Tabu Search,164,0.08025097846984863
+la14.txt,Genetic Algorithm,184,0.16746258735656738
+la14.txt,Ant Colony Optimization,240,1.5535449981689453
+la15.txt,Tabu Search,180,0.07352113723754883
+la15.txt,Genetic Algorithm,202,0.155043363571167
+la15.txt,Ant Colony Optimization,245,1.551314353942871
+la16.txt,Tabu Search,188,0.08668351173400879
+la16.txt,Genetic Algorithm,187,0.12952184677124023
+la16.txt,Ant Colony Optimization,262,1.226759672164917
+la17.txt,Tabu Search,196,0.06767654418945312
+la17.txt,Genetic Algorithm,215,0.13838911056518555
+la17.txt,Ant Colony Optimization,274,1.505415439605713
+la18.txt,Tabu Search,207,0.07158327102661133
+la18.txt,Genetic Algorithm,214,0.13373613357543945
+la18.txt,Ant Colony Optimization,287,1.3585057258605957
+la19.txt,Tabu Search,218,0.08250665664672852
+la19.txt,Genetic Algorithm,222,0.15734601020812988
+la19.txt,Ant Colony Optimization,253,1.5343425273895264
+la20.txt,Tabu Search,164,0.07451891899108887
+la20.txt,Genetic Algorithm,179,0.15109801292419434
+la20.txt,Ant Colony Optimization,227,1.5058887004852295

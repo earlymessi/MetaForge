@@ -1,3 +1,126 @@
-# MetaForge
+# 🔧 MetaForge
 
-MetaForge is an open-source optimization library for production scheduling and metaheuristic solvers.
+**MetaForge** is a modular optimization framework for solving **Job Shop Scheduling Problems (JSSP)** using advanced **metaheuristics** and **learning-based approaches**.
+
+🚀 From classic solvers like Tabu Search and Genetic Algorithms to modern DQN-based reinforcement learning and Neuroevolution — MetaForge brings it all together with clarity, structure, and fun.
+
+---
+
+## 🎯 Key Features
+
+- ✅ Support for classic OR-Library and custom JSON benchmark formats
+- 🧠 Modular solvers:
+  - Tabu Search
+  - Simulated Annealing
+  - Genetic Algorithm
+  - Ant Colony Optimization
+  - Q-Learning
+  - DQN (naive & replay-based)
+  - Neuroevolution
+- 📊 Beautiful convergence plots, runtime comparisons, and Gantt chart visualizations
+- 📦 Easy packaging, CLI usage, and extension with new solvers
+- 🔬 Designed for researchers, students, and practitioners alike
+
+---
+
+## 🚀 Quick Start
+
+### 1. Install MetaForge
+
+```bash
+pip install metaforge
+```
+
+Or clone locally for development:
+
+```bash
+git clone https://github.com/mageed-ghaleb/metaforge.git
+cd metaforge
+pip install -e .
+```
+
+---
+
+### 2. Run a Solver
+
+```python
+from metaforge.problems.benchmark_loader import load_job_shop_instance
+from metaforge.metaforge_runner import run_solver
+
+problem = load_job_shop_instance("data/benchmarks/ft06.txt")
+result = run_solver("ga", problem, track_schedule=True)
+
+print("Best Makespan:", result["makespan"])
+```
+
+---
+
+### 3. Run All Solvers on All Benchmarks
+
+```bash
+python -m src.metaforge.utils.compare_solvers
+```
+
+Generates CSV, plots, and Gantt charts from `data/benchmarks/`.
+
+---
+
+### 4. Interactive Notebook
+
+Explore MetaForge hands-on with our example notebook:
+
+📓 [`MetaForge_Example.ipynb`](notebooks/MetaForge_Example.ipynb)
+
+It walks you through:
+
+- Loading benchmark problems
+- Running various solvers (TS, GA, DQN, etc.)
+- Plotting convergence + Gantt charts
+- Comparing performance across solvers
+
+Perfect for experimentation, demos, and academic use.
+
+---
+
+## 📚 Documentation
+
+- 📖 [Usage Guide](docs/usage.md)
+- 🧠 [Solvers Overview](docs/solvers.md)
+- 📂 [Benchmark Datasets](docs/datasets.md)
+
+---
+
+## 🧠 Why MetaForge?
+
+Most libraries focus only on one type of solver. MetaForge unifies traditional, bio-inspired, and learning-based approaches in one clean, extensible Python package — built for experimentation, benchmarking, and educational use.
+
+Whether you're doing a thesis, publishing research, or solving real-world factory problems — **MetaForge is your launchpad**. 🚀
+
+---
+
+## 📈 Contributing
+
+We're just getting started! Feel free to:
+
+- Suggest solvers, features, or dataset formats
+- Fork and extend
+- Submit pull requests with improvements
+
+---
+
+## 📄 License
+
+MIT License — free for academic and commercial use.
+
+---
+
+## 👨‍💻 Author
+
+**Mageed Ghaleb**  
+📧 mageed.ghaleb@gmail.com  
+🔗 [LinkedIn](https://www.linkedin.com/in/mageed-ghaleb/)  
+🔗 [GitHub](https://github.com/mageed-ghaleb)
+
+---
+
+> Built with ❤️ for solvers, schedules, and scientific curiosity.

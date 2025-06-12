@@ -38,4 +38,4 @@ Repository = "https://github.com/mageed-ghaleb/metaforge"
 packages = ["metaforge"]
 
 [tool.setuptools.package-dir]
-"" = "src"
+metaforge = "src/metaforge"

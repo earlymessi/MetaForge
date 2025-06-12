@@ -71,7 +71,7 @@ plot_gantt_chart(schedule, num_machines=problem.num_machines, num_jobs=len(probl
 #### 📝 1. Hands-on Demo Notebook  
 Explore MetaForge interactively with a guided walk-through:
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://github.com/Mageed-Ghaleb/MetaForge/blob/main/notebooks/MetaForge_Colab_Demo.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Mageed-Ghaleb/MetaForge/blob/main/notebooks/MetaForge_Colab_Demo.ipynb)
 
 Covers:
 - Loading benchmark problems
@@ -83,7 +83,7 @@ Covers:
 #### 📊 2. Compare Solvers Notebook  
 Run all solvers on all benchmark files and generate visual comparisons:
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://github.com/Mageed-Ghaleb/MetaForge/blob/main/notebooks/MetaForge_Compare_Solvers.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Mageed-Ghaleb/MetaForge/blob/main/notebooks/MetaForge_Compare_Solvers.ipynb)
 
 Covers:
 - Running `ts`, `ga`, `sa`, `aco`, etc. across all problems

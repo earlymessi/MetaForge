@@ -21,10 +21,6 @@ dependencies = [
     "requests",
 ]
 
-[project.urls]
-Homepage = "https://github.com/mageed-ghaleb/metaforge"
-Repository = "https://github.com/mageed-ghaleb/metaforge"
-
 classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Scientific/Engineering :: Operations Research",
@@ -33,6 +29,10 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License"
 ]
+
+[project.urls]
+Homepage = "https://github.com/mageed-ghaleb/metaforge"
+Repository = "https://github.com/mageed-ghaleb/metaforge"
 
 [tool.setuptools]
 packages = ["metaforge"]

@@ -5,18 +5,9 @@ import matplotlib.pyplot as plt
 from metaforge.problems.benchmark_loader import load_job_shop_instance
 from metaforge.utils.timer import Timer
 from metaforge.metaforge_runner import run_solver
+from metaforge.utils.plotting import plot_solver_comparison
+from metaforge.utils.pretty_names import pretty_names
 
-# === Pretty name mapping for solvers ===
-pretty_names = {
-    "sa": "Simulated Annealing",
-    "ts": "Tabu Search",
-    "ga": "Genetic Algorithm",
-    "aco": "Ant Colony Optimization",
-    "q": "Q-Learning",
-    "dqn-naive": "DQN (naive)",
-    "dqn-replay": "DQN (replay)",
-    "neuroevo": "Neuroevolution",
-}
 
 def compare_solvers(solver_names, problem, track_schedule=True, plot=True):
     """
@@ -58,73 +49,54 @@ def compare_solvers(solver_names, problem, track_schedule=True, plot=True):
         }
 
     if plot:
-        plot_comparison(results)
+        plot_solver_comparison(results)
 
     return results
 
 
-def plot_comparison(results):
-    """
-    Plot convergence and runtime comparison of solver results.
-    """
-    plt.figure(figsize=(10, 5))
-
-    # Plot convergence history
-    plt.subplot(1, 2, 1)
-    for solver, res in results.items():
-        history = res.get("history", [])
-        if history:
-            label = pretty_names.get(solver, solver)
-            plt.plot(history, label=f"{label} (final: {res['best_score']})")
-    plt.title("Convergence (Makespan)")
-    plt.xlabel("Iteration")
-    plt.ylabel("Makespan")
-    plt.legend()
-    plt.grid(True)
-
-    # Plot runtime
-    plt.subplot(1, 2, 2)
-    solvers = list(results.keys())
-    times = [results[s]["runtime_sec"] for s in solvers]
-    plt.bar(solvers, times, color='gray')
-    plt.title("Runtime (sec)")
-    plt.ylabel("Time (s)")
-    plt.xticks(rotation=45)
-    plt.grid(True)
-
-    plt.tight_layout()
-    plt.show()
-
 def compare_all_benchmarks(
-    benchmark_folder,
+    benchmark_source,
     solvers,
     format="orlib",
     output_csv="results/benchmark_comparison.csv",
     track_schedule=False,
     plot=False
 ):
+    # Determine if source is a URL or local path
+    is_url = benchmark_source.startswith("http://") or benchmark_source.startswith("https://")
+
     if output_csv:
         output_dir = os.path.dirname(output_csv)
         if output_dir:
             os.makedirs(output_dir, exist_ok=True)
 
+    # Define benchmark files (common ORLib ones by default)
     benchmark_files = [
-        f for f in os.listdir(benchmark_folder)
-        if f.endswith(".txt")
+        "ft06.txt", "ft10.txt", "ft20.txt",
+        "la01.txt", "la02.txt", "la03.txt",
+        "la04.txt", "la05.txt"
     ]
-    benchmark_files.sort()
 
     results = []
 
     for benchmark_file in benchmark_files:
-        path = os.path.join(benchmark_folder, benchmark_file)
-        problem = load_job_shop_instance(path, format=format)
+        path = (
+            f"{benchmark_source.rstrip('/')}/{benchmark_file}" if is_url
+            else os.path.join(benchmark_source, benchmark_file)
+        )
+
+        try:
+            problem = load_job_shop_instance(path, format=format)
+        except Exception as e:
+            print(f"⚠️ Failed to load {benchmark_file}: {e}")
+            continue
 
         for solver in solvers:
             solver_label = pretty_names.get(solver, solver)
             print(f"Running {solver_label} on {benchmark_file}...")
+
             timer = Timer()
-            result  = run_solver(
+            result = run_solver(
                 solver,
                 problem,
                 track_schedule=track_schedule
@@ -140,8 +112,8 @@ def compare_all_benchmarks(
                 "all_schedules": result["schedules"],
                 "history": result["history"],
             })
-    
-    # Write valid fields results to CSV
+
+    # Write summary results to CSV
     if output_csv:
         with open(output_csv, "w", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=["benchmark", "solver", "best_score", "runtime_sec"])
@@ -165,15 +137,3 @@ def compare_all_benchmarks(
         plot_runtime_from_csv(output_csv)
 
     return results
-
-
-if __name__ == "__main__":
-    compare_all_benchmarks(
-        benchmark_folder="data/benchmarks",  # update path if needed
-        solvers=["ts", "ga", "aco"],
-        output_csv="results/test_output.csv",
-        track_schedule=True,
-        plot=True
-    )
-
-input("📈 Done! Press Enter to close plots...")

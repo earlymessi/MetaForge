@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from metaforge.utils.pretty_names import pretty_names
 
 def plot_solver_dashboard(history, temperature=None, title="Solver Performance", solver_name="Solver"):
     """
@@ -105,5 +106,38 @@ def plot_solver_summary(results, title="Solver Performance Summary"):
     axs[2].set_ylabel("Count")
 
     fig.suptitle(title)
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_solver_comparison(results):
+    """
+    Plot convergence and runtime comparison of solver results.
+    """
+    plt.figure(figsize=(10, 5))
+
+    # Plot convergence history
+    plt.subplot(1, 2, 1)
+    for solver, res in results.items():
+        history = res.get("history", [])
+        if history:
+            label = pretty_names.get(solver, solver)
+            plt.plot(history, label=f"{label} (final: {res['best_score']})")
+    plt.title("Convergence (Makespan)")
+    plt.xlabel("Iteration")
+    plt.ylabel("Makespan")
+    plt.legend()
+    plt.grid(True)
+
+    # Plot runtime
+    plt.subplot(1, 2, 2)
+    solvers = list(results.keys())
+    times = [results[s]["runtime_sec"] for s in solvers]
+    plt.bar(solvers, times, color='gray')
+    plt.title("Runtime (sec)")
+    plt.ylabel("Time (s)")
+    plt.xticks(rotation=45)
+    plt.grid(True)
+
     plt.tight_layout()
     plt.show()

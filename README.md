@@ -132,3 +132,17 @@ MIT License — free for academic and commercial use.
 ---
 
 > Built with ❤️ for solvers, schedules, and scientific curiosity.
+
+
+---
+
+## 🔎 Keywords (for discoverability)
+
+MetaForge is designed for:
+
+- Job Shop Scheduling Problems (JSSP)
+- Metaheuristics (Tabu Search, Genetic Algorithm, ACO, SA)
+- Reinforcement Learning in Scheduling (Q-Learning, DQN)
+- Production Scheduling Optimization
+- Flexible Flowshops & Real-world Scheduling
+- Benchmark Comparisons and Solver Visualization

@@ -23,3 +23,12 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/mageed-ghaleb/metaforge"
 Repository = "https://github.com/mageed-ghaleb/metaforge"
+
+classifiers = [
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Operations Research",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License"
+]

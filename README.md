@@ -1,29 +1,25 @@
 # 🔧 MetaForge
 
-**MetaForge** is a modular optimization framework for solving **Job Shop Scheduling Problems (JSSP)** using advanced **metaheuristics** and **learning-based approaches**.
+**MetaForge** is a modular Python toolkit for solving **Job Shop Scheduling Problems (JSSP)** using classic **metaheuristics** and modern **reinforcement learning** methods.
 
-🚀 From classic solvers like Tabu Search and Genetic Algorithms to modern DQN-based reinforcement learning and Neuroevolution — MetaForge brings it all together with clarity, structure, and fun.
-
----
-
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Mageed-Ghaleb/MetaForge/blob/main/notebooks/MetaForge_Colab_Demo.ipynb)
+🚀 From Tabu Search and Genetic Algorithms to Deep Q-Networks (DQN) and Neuroevolution — MetaForge brings together the best of optimization and AI in one clean, extensible framework.
 
 ---
 
 ## 🎯 Key Features
 
-- ✅ Support for classic OR-Library and custom JSON benchmark formats
-- 🧠 Modular solvers:
-  - Tabu Search
-  - Simulated Annealing
-  - Genetic Algorithm
-  - Ant Colony Optimization
+- ✅ Solve classic benchmark problems (OR-Library, JSON)
+- 🧠 Built-in solvers:
+  - Tabu Search (TS)
+  - Simulated Annealing (SA)
+  - Genetic Algorithm (GA)
+  - Ant Colony Optimization (ACO)
   - Q-Learning
-  - DQN (naive & replay-based)
+  - DQN (with and without replay buffer)
   - Neuroevolution
-- 📊 Beautiful convergence plots, runtime comparisons, and Gantt chart visualizations
-- 📦 Easy packaging, CLI usage, and extension with new solvers
-- 🔬 Designed for researchers, students, and practitioners alike
+- 📊 Beautiful convergence and Gantt chart visualizations
+- 🤖 Reinforcement Learning support out-of-the-box
+- 🧪 Designed for research, education, and real-world production scheduling
 
 ---
 
@@ -35,7 +31,7 @@
 pip install metaforge
 ```
 
-Or clone locally for development:
+Or for local development:
 
 ```bash
 git clone https://github.com/Mageed-Ghaleb/MetaForge.git
@@ -45,67 +41,68 @@ pip install -e .
 
 ---
 
-### 2.Run a Solver (Local or Remote Benchmark)
+### 2. Run a Solver (Example)
 
 ```python
-import os
-import requests
 from metaforge.problems.benchmark_loader import load_job_shop_instance
 from metaforge.metaforge_runner import run_solver
 
-# You can pass a local path or a URL to load the problem!
 problem = load_job_shop_instance("https://raw.githubusercontent.com/Mageed-Ghaleb/MetaForge/main/data/benchmarks/ft06.txt")
-
-# Run a solver (sa, ts, ga, aco, pso, ...)
-result = run_solver("ga", problem, track_schedule=True)
+result = run_solver("ts", problem, track_schedule=True)
 
 print("Best Makespan:", result["makespan"])
 ```
 
 ---
 
-### 3. Run All Solvers on All Benchmarks
+### 3. Visualize the Final Schedule
 
-```bash
-python -m src.metaforge.utils.compare_solvers
+```python
+from metaforge.utils.visualization import plot_gantt_chart
+
+schedule = result["schedules"][-1]
+plot_gantt_chart(schedule, num_machines=problem.num_machines, num_jobs=len(problem.jobs))
 ```
-
-Generates CSV, plots, and Gantt charts from the `data/benchmarks/` folder.
 
 ---
 
-### 4. Interactive Notebook
+### 4. Interactive Colab Notebooks 🚀
 
-Explore MetaForge hands-on with our example notebook:
+#### 📝 1. Hands-on Demo Notebook  
+Explore MetaForge interactively with a guided walk-through:
 
-📓 [`MetaForge_Example.ipynb`](https://github.com/Mageed-Ghaleb/MetaForge/blob/main/notebooks/MetaForge_Example.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://github.com/Mageed-Ghaleb/MetaForge/blob/main/notebooks/MetaForge_Colab_Demo.ipynb)
 
-It walks you through:
-
+Covers:
 - Loading benchmark problems
 - Running various solvers (TS, GA, DQN, etc.)
 - Plotting convergence + Gantt charts
-- Comparing performance across solvers
 
-> ✅ Coming soon: One-click Colab version for browser-based use — no setup needed.
+---
+
+#### 📊 2. Compare Solvers Notebook  
+Run all solvers on all benchmark files and generate visual comparisons:
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://github.com/Mageed-Ghaleb/MetaForge/blob/main/notebooks/MetaForge_Compare_Solvers.ipynb)
+
+Covers:
+- Running `ts`, `ga`, `sa`, `aco`, etc. across all problems
+- Convergence plots per benchmark
+- Solver performance summary plots
 
 ---
 
 ## 📚 Documentation
 
-> 📘 Full documentation site coming soon! In the meantime, browse core modules below:
-
-- 📖 [Usage Guide (source)](https://github.com/Mageed-Ghaleb/MetaForge/blob/main/docs/usage.md)
-- 🧠 [Solvers Overview (source)](https://github.com/Mageed-Ghaleb/MetaForge/blob/main/docs/solvers.md)
-- 📂 [Benchmark Datasets (source)](https://github.com/Mageed-Ghaleb/MetaForge/blob/main/docs/datasets.md)
+- 📖 [Usage Guide](docs/usage.md)
+- 🧠 [Solvers Overview](docs/solvers.md)
+- 📂 [Benchmark Format](docs/datasets.md)
 
 ---
 
 ## 🧠 Why MetaForge?
 
-Most libraries focus only on one type of solver. MetaForge unifies traditional, bio-inspired, and learning-based approaches in one clean, extensible Python package — built for experimentation, benchmarking, and educational use.
-
-Whether you're doing a thesis, publishing research, or solving real-world factory problems — **MetaForge is your launchpad**. 🚀
+Most libraries focus on one type of solver. MetaForge unifies traditional algorithms and deep reinforcement learning into one clean package. Whether you’re teaching, publishing, or scheduling in a factory — MetaForge is your launchpad. 🚀
 
 ---
 
@@ -113,9 +110,9 @@ Whether you're doing a thesis, publishing research, or solving real-world factor
 
 We're just getting started! Feel free to:
 
-- Suggest solvers, features, or dataset formats
+- Suggest solvers or enhancements
 - Fork and extend
-- Submit pull requests with improvements
+- Submit PRs — code, docs, notebooks, anything
 
 ---
 
@@ -130,7 +127,7 @@ MIT License — free for academic and commercial use.
 **Mageed Ghaleb**  
 📧 mageed.ghaleb@gmail.com  
 🔗 [LinkedIn](https://www.linkedin.com/in/mageed-ghaleb/)  
-🔗 [GitHub](https://github.com/Mageed-Ghaleb)
+🔗 [GitHub](https://github.com/mageed-ghaleb)
 
 ---
 

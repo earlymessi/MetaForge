@@ -35,7 +35,7 @@ Homepage = "https://github.com/mageed-ghaleb/metaforge"
 Repository = "https://github.com/mageed-ghaleb/metaforge"
 
 [tool.setuptools]
-packages = ["metaforge"]
+include-package-data = true
 
-[tool.setuptools.package-dir]
-metaforge = "src/metaforge"
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="metaforge",
-    version="1.0.1",
+    version="1.0.2",
     description="Metaheuristic and Reinforcement Learning Solvers for the Job Shop Scheduling Problem (JSSP)",
     author="Mageed Ghaleb",
     author_email="your.email@example.com",

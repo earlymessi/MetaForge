@@ -81,7 +81,7 @@ Covers:
 ---
 
 #### 📊 2. Compare Solvers Notebook  
-Run all solvers on all benchmark files and generate visual comparisons:
+Run all solvers on all benchmark files and generate visual comparisons: 
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Mageed-Ghaleb/MetaForge/blob/main/notebooks/MetaForge_Compare_Solvers.ipynb)
 

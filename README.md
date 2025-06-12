@@ -6,6 +6,12 @@
 
 ---
 
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Mageed-Ghaleb/MetaForge/blob/main/notebooks/MetaForge_Colab_Demo.ipynb)
+
+✅ After that, anyone can launch it in 1 click — no setup needed.
+
+---
+
 ## 🎯 Key Features
 
 - ✅ Support for classic OR-Library and custom JSON benchmark formats
@@ -34,20 +40,25 @@ pip install metaforge
 Or clone locally for development:
 
 ```bash
-git clone https://github.com/mageed-ghaleb/metaforge.git
-cd metaforge
+git clone https://github.com/Mageed-Ghaleb/MetaForge.git
+cd MetaForge
 pip install -e .
 ```
 
 ---
 
-### 2. Run a Solver
+### 2.Run a Solver (Local or Remote Benchmark)
 
 ```python
+import os
+import requests
 from metaforge.problems.benchmark_loader import load_job_shop_instance
 from metaforge.metaforge_runner import run_solver
 
-problem = load_job_shop_instance("data/benchmarks/ft06.txt")
+# You can pass a local path or a URL to load the problem!
+problem = load_job_shop_instance("https://raw.githubusercontent.com/Mageed-Ghaleb/MetaForge/main/data/benchmarks/ft06.txt")
+
+# Run a solver (sa, ts, ga, aco, pso, ...)
 result = run_solver("ga", problem, track_schedule=True)
 
 print("Best Makespan:", result["makespan"])
@@ -61,7 +72,7 @@ print("Best Makespan:", result["makespan"])
 python -m src.metaforge.utils.compare_solvers
 ```
 
-Generates CSV, plots, and Gantt charts from `data/benchmarks/`.
+Generates CSV, plots, and Gantt charts from the `data/benchmarks/` folder.
 
 ---
 
@@ -69,7 +80,7 @@ Generates CSV, plots, and Gantt charts from `data/benchmarks/`.
 
 Explore MetaForge hands-on with our example notebook:
 
-📓 [`MetaForge_Example.ipynb`](notebooks/MetaForge_Example.ipynb)
+📓 [`MetaForge_Example.ipynb`](https://github.com/Mageed-Ghaleb/MetaForge/blob/main/notebooks/MetaForge_Example.ipynb)
 
 It walks you through:
 
@@ -78,15 +89,17 @@ It walks you through:
 - Plotting convergence + Gantt charts
 - Comparing performance across solvers
 
-Perfect for experimentation, demos, and academic use.
+> ✅ Coming soon: One-click Colab version for browser-based use — no setup needed.
 
 ---
 
 ## 📚 Documentation
 
-- 📖 [Usage Guide](docs/usage.md)
-- 🧠 [Solvers Overview](docs/solvers.md)
-- 📂 [Benchmark Datasets](docs/datasets.md)
+> 📘 Full documentation site coming soon! In the meantime, browse core modules below:
+
+- 📖 [Usage Guide (source)](https://github.com/Mageed-Ghaleb/MetaForge/blob/main/docs/usage.md)
+- 🧠 [Solvers Overview (source)](https://github.com/Mageed-Ghaleb/MetaForge/blob/main/docs/solvers.md)
+- 📂 [Benchmark Datasets (source)](https://github.com/Mageed-Ghaleb/MetaForge/blob/main/docs/datasets.md)
 
 ---
 
@@ -119,7 +132,7 @@ MIT License — free for academic and commercial use.
 **Mageed Ghaleb**  
 📧 mageed.ghaleb@gmail.com  
 🔗 [LinkedIn](https://www.linkedin.com/in/mageed-ghaleb/)  
-🔗 [GitHub](https://github.com/mageed-ghaleb)
+🔗 [GitHub](https://github.com/Mageed-Ghaleb)
 
 ---
 

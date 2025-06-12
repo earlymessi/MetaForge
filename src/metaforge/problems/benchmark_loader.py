@@ -1,22 +1,35 @@
 
 import json
+import os
+import requests
+import tempfile
 from metaforge.problems.jobshop import JobShopProblem, Job, Task
 
 def load_job_shop_instance(path, format='orlib'):
     """
-    Load a Job Shop Scheduling Problem instance from a file.
+    Load a Job Shop Scheduling Problem instance from a file or URL.
 
     Args:
-        path (str): Path to the file.
+        path (str): Path to the file or URL.
         format (str): 'orlib' for .txt benchmarks, 'json' for custom format.
 
     Returns:
         JobShopProblem: The parsed problem.
     """
+    if path.startswith("http://") or path.startswith("https://"):
+        # Download to temporary file
+        response = requests.get(path)
+        response.raise_for_status()
+        with tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix=".txt") as tmp:
+            tmp.write(response.text)
+            tmp_path = tmp.name
+    else:
+        tmp_path = path
+
     if format == 'orlib':
-        return _load_orlib_format(path)
+        return _load_orlib_format(tmp_path)
     elif format == 'json':
-        return _load_json_format(path)
+        return _load_json_format(tmp_path)
     else:
         raise ValueError(f"Unsupported format: {format}")
 

@@ -8,8 +8,6 @@
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Mageed-Ghaleb/MetaForge/blob/main/notebooks/MetaForge_Colab_Demo.ipynb)
 
-✅ After that, anyone can launch it in 1 click — no setup needed.
-
 ---
 
 ## 🎯 Key Features

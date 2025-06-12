@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "metaforge"
-version = "1.0.0"
+version = "1.0.1"
 description = "MetaForge: A modular optimization framework for solving Job Shop Scheduling problems using metaheuristics and learning-based approaches."
 authors = [
     { name = "Mageed Ghaleb", email = "mageed.ghaleb@gmail.com" }

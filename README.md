@@ -70,18 +70,19 @@ plot_gantt_chart(schedule, num_machines=problem.num_machines, num_jobs=len(probl
 
 ## 📓 Notebooks
 
-| Name | Description |
-|------|-------------|
-| [MetaForge_Quick_Start](notebooks/MetaForge_Quick_Start.ipynb) | Light demo: install, run, visualize |
-| [MetaForge_Complete_Testing](notebooks/MetaForge_Complete_Testing.ipynb) | Full testing suite across all solvers |
+| Name | Description | Launch |
+|------|-------------|--------|
+| MetaForge_Quick_Start.ipynb | Light demo: install, run, visualize | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Mageed-Ghaleb/MetaForge/blob/main/notebooks/MetaForge_Quick_Start.ipynb) |
+| MetaForge_Complete_Testing.ipynb | Full testing suite across all solvers | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Mageed-Ghaleb/MetaForge/blob/main/notebooks/MetaForge_Complete_Testing.ipynb) |
 
 ---
 
 ## 📚 Documentation
 
-- 📖 [Usage Guide](docs/usage.md)
-- 🧠 [Solvers Overview](docs/solvers.md)
-- 📂 [Benchmark Format](docs/datasets.md)
+- 📖 [Usage Guide](https://github.com/Mageed-Ghaleb/MetaForge/blob/main/docs/usage.md)
+- 🧠 [Solvers Overview](https://github.com/Mageed-Ghaleb/MetaForge/blob/main/docs/solvers.md)
+- 🧠 [Solvers In Details](https://github.com/Mageed-Ghaleb/MetaForge/tree/main/docs/solvers)
+- 📂 [Benchmark Format](https://github.com/Mageed-Ghaleb/MetaForge/blob/main/docs/datasets.md)
 
 ---
 

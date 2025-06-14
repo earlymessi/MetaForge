@@ -1,6 +1,6 @@
 # 🔧 MetaForge
 
-**MetaForge** is a modular Python toolkit for solving **Job Shop Scheduling Problems (JSSP)** using classic **metaheuristics** and modern **reinforcement learning** methods.
+MetaForge is a modular Python toolkit for solving **Job Shop Scheduling Problems (JSSP)** using classic **metaheuristics** and modern **reinforcement learning** methods.
 
 🚀 From Tabu Search and Genetic Algorithms to Deep Q-Networks (DQN) and Neuroevolution — MetaForge brings together the best of optimization and AI in one clean, extensible framework.
 
@@ -23,72 +23,57 @@
 
 ---
 
-## 🚀 Quick Start
+## 📦 Installation
 
-### 1. Install MetaForge
+From PyPI:
 
 ```bash
 pip install metaforge
 ```
 
-Or for local development:
+From GitHub (latest):
 
 ```bash
-git clone https://github.com/Mageed-Ghaleb/MetaForge.git
-cd MetaForge
-pip install -e .
+pip install git+https://github.com/Mageed-Ghaleb/MetaForge.git
 ```
 
 ---
 
-### 2. Run a Solver (Example)
+## 📁 Quick Start
 
 ```python
 from metaforge.problems.benchmark_loader import load_job_shop_instance
 from metaforge.metaforge_runner import run_solver
 
-problem = load_job_shop_instance("https://raw.githubusercontent.com/Mageed-Ghaleb/MetaForge/main/data/benchmarks/ft06.txt")
-result = run_solver("ts", problem, track_schedule=True)
+# Load a benchmark from URL
+url = "https://raw.githubusercontent.com/Mageed-Ghaleb/MetaForge/main/data/benchmarks/ft06.txt"
+problem = load_job_shop_instance(url)
 
+# Run a solver
+result = run_solver("ts", problem)
+
+# View makespan
 print("Best Makespan:", result["makespan"])
 ```
 
 ---
 
-### 3. Visualize the Final Schedule
+## 📊 Visualizations
 
 ```python
 from metaforge.utils.visualization import plot_gantt_chart
-
 schedule = result["schedules"][-1]
 plot_gantt_chart(schedule, num_machines=problem.num_machines, num_jobs=len(problem.jobs))
 ```
 
 ---
 
-### 4. Interactive Colab Notebooks 🚀
+## 📓 Notebooks
 
-#### 📝 1. Hands-on Demo Notebook  
-Explore MetaForge interactively with a guided walk-through:
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Mageed-Ghaleb/MetaForge/blob/main/notebooks/MetaForge_Colab_Demo.ipynb)
-
-Covers:
-- Loading benchmark problems
-- Running various solvers (TS, GA, DQN, etc.)
-- Plotting convergence + Gantt charts
-
----
-
-#### 📊 2. Compare Solvers Notebook  
-Run all solvers on all benchmark files and generate visual comparisons: 
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Mageed-Ghaleb/MetaForge/blob/main/notebooks/MetaForge_Compare_Solvers.ipynb)
-
-Covers:
-- Running `ts`, `ga`, `sa`, `aco`, etc. across all problems
-- Convergence plots per benchmark
-- Solver performance summary plots
+| Name | Description |
+|------|-------------|
+| [MetaForge_Quick_Start](notebooks/MetaForge_Quick_Start.ipynb) | Light demo: install, run, visualize |
+| [MetaForge_Complete_Testing](notebooks/MetaForge_Complete_Testing.ipynb) | Full testing suite across all solvers |
 
 ---
 
@@ -103,6 +88,14 @@ Covers:
 ## 🧠 Why MetaForge?
 
 Most libraries focus on one type of solver. MetaForge unifies traditional algorithms and deep reinforcement learning into one clean package. Whether you’re teaching, publishing, or scheduling in a factory — MetaForge is your launchpad. 🚀
+
+---
+
+## 🔧 Benchmarks Supported
+
+- FT06, FT10, FT20 (OR-Library)
+- LA01–LA05
+- JSON format coming soon
 
 ---
 
@@ -132,7 +125,6 @@ MIT License — free for academic and commercial use.
 ---
 
 > Built with ❤️ for solvers, schedules, and scientific curiosity.
-
 
 ---
 

@@ -8,7 +8,7 @@ from metaforge.solvers.q_learning import QAgentSolver
 from metaforge.solvers.dqn_solver import DQNAgentSolver, DQNAgentSolverReplay
 from metaforge.solvers.neuroevolution_solver import NeuroevolutionSolver
 
-def run_solver(solver_name, problem, params=None, track_history=True, track_schedule=False):
+def run_solver(solver_name, problem, params=None, track_history=True, track_schedule=True):
     """
     Runs a solver by name with optional tracking and returns a unified result dict.
 

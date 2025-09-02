@@ -52,7 +52,7 @@ class ReplayBuffer:
 
 
 class DQNAgentSolver(BaseSolver):
-    def __init__(self, problem, episodes=1000, epsilon=0.1, gamma=0.95, lr=1e-3):
+    def __init__(self, problem, episodes=1001, epsilon=0.1, gamma=0.95, lr=1e-3):
         super().__init__(problem)
         self.episodes = episodes
         self.epsilon = epsilon

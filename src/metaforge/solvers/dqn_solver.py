@@ -52,7 +52,7 @@ class ReplayBuffer:
 
 
 class DQNAgentSolver(BaseSolver):
-    def __init__(self, problem, episodes=200, epsilon=0.1, gamma=0.95, lr=1e-3):
+    def __init__(self, problem, episodes=1000, epsilon=0.1, gamma=0.95, lr=1e-3):
         super().__init__(problem)
         self.episodes = episodes
         self.epsilon = epsilon
@@ -90,6 +90,8 @@ class DQNAgentSolver(BaseSolver):
         all_schedules = [] if track_schedule else None
 
         for ep in range(self.episodes):
+            # 添加打印训练轮数的语句
+            print(f"DQNAgentSolver (Naive) - Episode {ep + 1}/{self.episodes}")
             job_ptrs, job_ready = self._get_initial_state()
             machine_ready = [0] * self.problem.num_machines
             sequence = []
@@ -154,7 +156,7 @@ class DQNAgentSolver(BaseSolver):
 
 
 class DQNAgentSolverReplay(BaseSolver):
-    def __init__(self, problem, episodes=300, epsilon=1.0, epsilon_min=0.05,
+    def __init__(self, problem, episodes=1000, epsilon=1.0, epsilon_min=0.05,
                 epsilon_decay=0.995, gamma=0.95, lr=1e-3,
                 buffer_capacity=10000, batch_size=64, target_update_freq=10):
         super().__init__(problem)
@@ -230,6 +232,8 @@ class DQNAgentSolverReplay(BaseSolver):
         all_schedules = [] if track_schedule else None
 
         for ep in range(self.episodes):
+            # 添加打印训练轮数的语句
+            print(f"DQNAgentSolver (replay) - Episode {ep + 1}/{self.episodes}")
             job_ptrs = [0] * self.num_jobs
             job_ready = [0] * self.num_jobs
             machine_ready = [0] * self.problem.num_machines

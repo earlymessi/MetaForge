@@ -8,4 +8,5 @@ pretty_names = {
     "dqn-naive": "DQN (naive)",
     "dqn-replay": "DQN (replay)",
     "neuroevo": "Neuroevolution",
+    "dqn-dyn": "DQN (Dynamic)"   # 👈 新增
 }

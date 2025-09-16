@@ -1,5 +1,4 @@
 import time
-
 from metaforge.solvers.tabu_search import TabuSearchSolver
 from metaforge.solvers.simulated_annealing import SimulatedAnnealingSolver
 from metaforge.solvers.genetic_algorithm import GeneticAlgorithmSolver
@@ -7,8 +6,9 @@ from metaforge.solvers.ant_colony import AntColonySolver
 from metaforge.solvers.q_learning import QAgentSolver
 from metaforge.solvers.dqn_solver import DQNAgentSolver, DQNAgentSolverReplay
 from metaforge.solvers.neuroevolution_solver import NeuroevolutionSolver
+from metaforge.solvers.dqn_dyn import DQNAgentSolverReplayDynamic #引入动态情景
 
-def run_solver(solver_name, problem, params=None, track_history=True, track_schedule=True):
+def run_solver(solver_name, problem, params=None, track_history=True, track_schedule=True, dynamic_events=None):
     """
     Runs a solver by name with optional tracking and returns a unified result dict.
 
@@ -72,6 +72,14 @@ def run_solver(solver_name, problem, params=None, track_history=True, track_sche
         )
     elif solver_name.lower() == "neuroevo":
         solver = NeuroevolutionSolver(problem, **params)
+        solution, score, history, schedules = solver.run(
+            track_history=track_history,
+            track_schedule=track_schedule
+        )
+        # === 2. 新增 elif 分支来处理动态求解器 ===
+    elif solver_name.lower() == "dqn-dyn":
+        # 实例化动态求解器，并传入 dynamic_events
+        solver = DQNAgentSolverReplayDynamic(problem, dynamic_events=dynamic_events, **params)
         solution, score, history, schedules = solver.run(
             track_history=track_history,
             track_schedule=track_schedule

@@ -1,43 +1,44 @@
 import os
 import time
 import csv
+import copy  # === 关键点2：导入 copy 模块 ===
 import matplotlib.pyplot as plt
+from sympy import false
+
 from metaforge.problems.benchmark_loader import load_job_shop_instance
 from metaforge.utils.timer import Timer
 from metaforge.metaforge_runner import run_solver
 from metaforge.utils.plotting import plot_solver_comparison
-from metaforge.utils.pretty_names import pretty_names
+# === 关键点3：导入我们新的“主”绘图函数，替换旧的 ===
+from metaforge.utils.visualization import plot_comprehensive_comparison
+from metaforge.utils.pretty_names import pretty_names # pretty_names 在绘图函数内部加载，这里不需要
 
 
-def compare_solvers(solver_names, problem, track_schedule=True, plot=True):
+def compare_solvers(solver_names, problem, track_schedule=True, plot=False, dynamic_events=None):
     """
-    Run and compare multiple solvers on the same job shop problem instance.
-
-    Args:
-        solver_names (List[str]): List of solver identifiers (e.g., ["ts", "aco", "dqn"]).
-        problem (JobShopProblem): The job shop problem instance.
-        track_schedule (bool): Whether to collect history and best schedules.
-        plot (bool): Whether to display visual comparisons.
-
-    Returns:
-        Dict[str, Dict]: A mapping of solver name to its results:
-            {
-                "solver_name": {
-                    "best_score": ...,
-                    "runtime_sec": ...,
-                    "best_solution": ...,
-                    "all_schedules": ...,
-                    "history": ...
-                },
-                ...
-            }
+    运行并比较多个求解器，并在需要时自动生成一套完整的对比图表。
     """
     results = {}
 
+    # 存储初始工件数量，以便之后传递给绘图函数
+    initial_num_jobs = len(problem.jobs)
+
     for solver in solver_names:
         print(f"🔧 Running solver: {solver}...")
+
+        # === 关键点2：为每个求解器创建问题的深拷贝，保证公平 ===
+        problem_copy = copy.deepcopy(problem)
+        events_copy = copy.deepcopy(dynamic_events) if dynamic_events else None
+
         start = time.time()
-        output = run_solver(solver, problem, track_schedule=track_schedule)
+        # === 关键点1：将 dynamic_events 传递给 run_solver ===
+        output = run_solver(
+            solver,
+            problem_copy,
+            track_schedule=track_schedule,
+            dynamic_events=events_copy
+
+        )
         end = time.time()
 
         results[solver] = {
@@ -47,9 +48,21 @@ def compare_solvers(solver_names, problem, track_schedule=True, plot=True):
             "all_schedules": output.get("schedules"),
             "history": output.get("history")
         }
-
     if plot:
         plot_solver_comparison(results)
+    # === 关键点3：当 plot=True 时，调用我们升级后的“主”绘图函数 ===
+    elif plot == False:
+        # 动态加载 pretty_names 以避免在顶层导入时可能产生的循环依赖问题
+        from metaforge.utils.pretty_names import pretty_names
+        plot_solver_comparison(results)
+        # 调用这个函数，它会自动生成所有三个图表
+        plot_comprehensive_comparison(
+            results=results,
+            problem=problem,  # 传递原始problem以获取机器数等信息
+            pretty_names=pretty_names,
+            dynamic_events=dynamic_events,
+            initial_num_jobs=initial_num_jobs
+        )
 
     return results
 

@@ -18,12 +18,12 @@ pretty_names = {
 
 # Load the problem instance
 root_dir = Path(__file__).resolve().parents[1]  # MetaForge/
-file_path = root_dir / "data" / "benchmarks" / "ft06.txt"
+file_path = root_dir / "data" / "benchmarks" / "ft10.txt"
 #
 problem = load_job_shop_instance(str(file_path), format="orlib")
 
 # Define the solvers you want to compare
-solvers = ["sa", "ts", "ga", "aco", "q", "dqn-naive", "dqn-replay", "neuroevo"]
+solvers = ["sa", "ts", "ga", "aco", "q", "dqn-naive", "dqn-replay", "neuroevo","dqn-dyn"]
 
 # Run comparison and plot results
 results = compare_solvers(solvers, problem, track_schedule=True, plot=True)
@@ -41,14 +41,15 @@ from metaforge.utils.visualization import plot_multiple_gantt
 
 plot_multiple_gantt(
     schedules_dict={
-        # "SA": results["sa"]["all_schedules"][-1],
-        # "TS": results["ts"]["all_schedules"][-1],
-        # "GA": results["ga"]["all_schedules"][-1],
-        # "ACO": results["aco"]["all_schedules"][-1],
-        # "Q-Learning": results["q"]["all_schedules"][-1],
-        # "DQN (naive)": results["dqn-naive"]["all_schedules"][-1],
+        "SA": results["sa"]["all_schedules"][-1],
+        "TS": results["ts"]["all_schedules"][-1],
+        "GA": results["ga"]["all_schedules"][-1],
+        "ACO": results["aco"]["all_schedules"][-1],
+        "Q-Learning": results["q"]["all_schedules"][-1],
+        "DQN (naive)": results["dqn-naive"]["all_schedules"][-1],
         "DQN (replay)": results["dqn-replay"]["all_schedules"][-1],
-        # "Neuroevo": results["neuroevo"]["all_schedules"][-1],
+        "Neuroevo": results["neuroevo"]["all_schedules"][-1],
+        "DQN (dyn)": results["dqn-dyn"]["all_schedules"][-1],
     },
     num_machines=problem.num_machines,
     num_jobs=len(problem.jobs)

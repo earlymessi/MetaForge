@@ -50,9 +50,12 @@ class ReplayBuffer:
     def __len__(self):
         return len(self.buffer)
 
+    def clear(self):  # <--- 添加这个方法
+        self.buffer.clear()
+
 
 class DQNAgentSolver(BaseSolver):
-    def __init__(self, problem, episodes=1001, epsilon=0.1, gamma=0.95, lr=1e-3):
+    def __init__(self, problem, episodes=400, epsilon=0.1, gamma=0.95, lr=1e-3):
         super().__init__(problem)
         self.episodes = episodes
         self.epsilon = epsilon
@@ -156,7 +159,7 @@ class DQNAgentSolver(BaseSolver):
 
 
 class DQNAgentSolverReplay(BaseSolver):
-    def __init__(self, problem, episodes=1000, epsilon=1.0, epsilon_min=0.05,
+    def __init__(self, problem, episodes=400, epsilon=1.0, epsilon_min=0.05,
                 epsilon_decay=0.995, gamma=0.95, lr=1e-3,
                 buffer_capacity=10000, batch_size=64, target_update_freq=10):
         super().__init__(problem)

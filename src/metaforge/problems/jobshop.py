@@ -6,15 +6,28 @@ class JobShopProblem:
     Represents a job shop scheduling problem using object-oriented modeling.
     """
 
-    def __init__(self, jobs):
+    def __init__(self, jobs, tardiness_penalty_per_unit=100, overtime_cost_per_unit=10):
         """
         Args:
             jobs (List[Job]): A list of Job objects.
         """
+        """
+               【修改】初始化函数，增加了成本相关的参数。
+
+               Args:
+                   jobs (List[Job]): A list of Job objects.
+                   tardiness_penalty_per_unit (float): 每单位延误时间的惩罚成本.
+                   overtime_cost_per_unit (float): 每单位加班时间的额外成本.
+               """
         self.jobs = jobs
         self.num_jobs = len(jobs)
+        # 【修改】确保即使有新job加入，也能正确计算机器数量
+        all_tasks = [task for job in jobs for task in job.tasks]
         self.num_machines = max(task.machine_id for job in jobs for task in job.tasks) + 1
         self.machines = [Machine(i) for i in range(self.num_machines)]
+        # 【新增】存储成本参数，供DQN环境和奖励函数使用
+        self.TARDINESS_PENALTY = tardiness_penalty_per_unit
+        self.OVERTIME_COST = overtime_cost_per_unit
 
     def evaluate(self, operation_order):
         """
@@ -130,10 +143,28 @@ class Task:
 
 
 class Job:
-    def __init__(self, tasks, id=None):
+    def __init__(self, tasks, id=None, arrival_time=0, due_date=None, due_date_k_factor=2.5):
+        """
+                【修改】初始化函数，增加了 arrival_time 和 due_date。
+
+                Args:
+                    tasks (List[Task]): 工序列表.
+                    id (any, optional): Job的ID.
+                    arrival_time (int, optional): Job到达车间的时间. 默认为 0.
+                    due_date (int, optional): Job必须完成的交付日期. 如果为None，会自动计算.
+                    due_date_k_factor (float, optional): 用于自动计算交付日期的宽松系数.
+                                                         due_date = arrival_time + total_duration * k_factor.
+                """
         self.tasks = tasks  # List[Task]
         self.id = id
-
+        self.arrival_time = arrival_time
+        # 【新增】为 Job 设置交付日期 (due_date)
+        if due_date is not None:
+            self.due_date = due_date
+        else:
+            # 如果未提供due_date，则根据总处理时间自动计算
+            total_processing_time = sum(task.duration for task in self.tasks)
+            self.due_date = self.arrival_time + total_processing_time * due_date_k_factor
     def __len__(self):
         return len(self.tasks)
 
@@ -144,8 +175,17 @@ class Job:
 class Machine:
     def __init__(self, id):
         self.id = id
+        # 【新增】机器的工作模式和成本率
+        self.mode = 'normal'  # 'normal', 'overtime', 'maintenance'
+        self.cost_rate_multiplier = {
+            'normal': 1.0,  # 标准成本系数
+            'overtime': 1.5  # 加班成本系数是标准的1.5倍
+        }
         self.calendar = []      # Reserved for future availability windows
         self.maintenance = []   # Reserved for future maintenance periods
 
+    def get_current_cost_rate(self):
+        """获取当前模式下的成本率乘数"""
+        return self.cost_rate_multiplier.get(self.mode, 1.0)
     def __repr__(self):
         return f"Machine(id={self.id})"

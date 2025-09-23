@@ -40,7 +40,10 @@ def compare_solvers(solver_names, problem, track_schedule=True, plot=False, dyna
 
         )
         end = time.time()
-
+        # --- 【核心修复】 ---
+        # 在将 run_solver 的输出存入最终的 results 字典时，
+        # 对 schedules 列表进行深拷贝，以确保其完全独立和安全。
+        schedules_copy = copy.deepcopy(output.get("schedules"))
         results[solver] = {
             "best_score": output["makespan"],
             "runtime_sec": round(end - start, 2),

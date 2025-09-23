@@ -78,14 +78,23 @@ def run_solver(solver_name, problem, params=None, track_history=True, track_sche
         )
         # === 2. 新增 elif 分支来处理动态求解器 ===
     elif solver_name.lower() == "dqn-dyn":
-        # 实例化动态求解器，并传入 dynamic_events
+        # 实例化动态求解器
         solver = DQNAgentSolverReplayDynamic(problem, dynamic_events=dynamic_events, **params)
-        solution, score, history, schedules = solver.run(
+
+        # 1. 将返回的整个字典存入一个变量中，不再进行解包
+        result_dict = solver.run(
             track_history=track_history,
             track_schedule=track_schedule
         )
+
+        # 2. 从字典中通过键（key）来获取需要的值
+        score = result_dict.get("makespan")
+        history = result_dict.get("history")
+        schedules = result_dict.get("all_schedules")  # 这已经包含了最终的最佳调度方案
+        solution = result_dict.get("solution")  # solution 就是最佳调度方案
+
     else:
-        raise ValueError(f"Unknown solver: {solver_name}")
+        raise ValueError(f"未知的求解器: {solver_name}")
 
     total_time = time.time() - start
 

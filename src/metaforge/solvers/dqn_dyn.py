@@ -10,9 +10,8 @@ from metaforge.solvers.dqn_solver import QNetwork, ReplayBuffer
 
 class DQNAgentSolverReplayDynamic(BaseSolver):
     """
-    【最终完整版 - 已安装逻辑门控】
-    奖励函数采用持续性惩罚，并引入逻辑门控限制“无脑”加班。
-    修复了所有已知的 TypeError 和 UnboundLocalError。
+    【最终完整版 - v5 - 循环修正】
+    修正了因非时间推进型动作（加班/外包）导致的无限循环问题。
     """
 
     def __init__(self, problem, dynamic_events=None, episodes=300,
@@ -23,7 +22,8 @@ class DQNAgentSolverReplayDynamic(BaseSolver):
                  reward_on_time=15.0,
                  tardiness_penalty=100.0,
                  overtime_penalty_per_unit=2.0,
-                 cost_weight=10.0):
+                 cost_weight=10.0,
+                 max_steps_per_episode=5000):
 
         super().__init__(problem)
         if not hasattr(self.problem, 'initial_jobs'):
@@ -32,6 +32,7 @@ class DQNAgentSolverReplayDynamic(BaseSolver):
 
         self.MAX_JOBS = max_jobs
         self.MAX_MACHINES = self.problem.num_machines
+        self.max_steps = max_steps_per_episode
 
         self.episodes = episodes
         self.epsilon_init = epsilon
@@ -52,6 +53,8 @@ class DQNAgentSolverReplayDynamic(BaseSolver):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.loss_fn = nn.MSELoss()
 
+        self.best_model_state_dict = None
+
         self._initialize_problem_parameters()
         self._initialize_networks()
         self.buffer = ReplayBuffer(capacity=buffer_capacity)
@@ -70,6 +73,22 @@ class DQNAgentSolverReplayDynamic(BaseSolver):
         self.target_qnet.load_state_dict(self.qnet.state_dict())
         self.target_qnet.eval()
         self.optimizer = optim.Adam(self.qnet.parameters(), lr=self.lr)
+
+    def save_model(self, file_path):
+        if self.best_model_state_dict:
+            print(f"💾 保存最佳模型权重至 {file_path}")
+            torch.save(self.best_model_state_dict, file_path)
+        else:
+            print("⚠️ 警告: 训练中未发现有效解。将保存当前模型状态。")
+            torch.save(self.qnet.state_dict(), file_path)
+
+    def load_model(self, file_path):
+        print(f"📂 从 {file_path} 加载模型权重")
+        state_dict = torch.load(file_path, map_location=self.device)
+        self.qnet.load_state_dict(state_dict)
+        self.target_qnet.load_state_dict(state_dict)
+        self.qnet.eval()
+        self.target_qnet.eval()
 
     def _build_state_tensor(self, job_ptrs, job_ready, machine_status):
         current_num_jobs = len(job_ptrs)
@@ -90,24 +109,15 @@ class DQNAgentSolverReplayDynamic(BaseSolver):
         return torch.tensor(padded_ptrs + padded_ready + padded_tardiness + padded_machine_status, dtype=torch.float32,
                             device=self.device)
 
-    # === 【核心修改】这里是全新的“逻辑门控”函数 ===
     def _get_available_actions(self, job_ptrs, job_ready, machine_status, machine_modes):
-        """
-        【逻辑门控版】
-        获取当前合法的动作。只有在系统“延期压力”足够大时，才将加班选项加入。
-        """
         available_actions = []
         current_num_jobs = len(job_ptrs)
-
-        # 1. 获取可调度的工序
         for j in range(current_num_jobs):
             if job_ptrs[j] < self.job_counts[j]:
                 op_idx = job_ptrs[j]
                 machine_req = self.problem.jobs[j].tasks[op_idx].machine_id
                 if machine_status[machine_req] == 1:
                     available_actions.append(j)
-
-        # 2. 计算系统整体的“延期压力”
         total_urgency = 0
         num_pending_jobs = 0
         for j in range(current_num_jobs):
@@ -117,26 +127,18 @@ class DQNAgentSolverReplayDynamic(BaseSolver):
                     self.problem.jobs[j].tasks[i].duration for i in range(job_ptrs[j], self.job_counts[j]))
                 est_completion_time = max(self.current_time, job_ready[j]) + remaining_time_est
                 due_date = self.problem.jobs[j].due_date
-
                 if due_date > 0:
-                    # 紧急度定义为：(预估完成时间 - 交付日期) / 交付日期
                     urgency = (est_completion_time - due_date) / due_date
-                    total_urgency += max(0, urgency)  # 只累加正的紧急度（有延期风险的）
-
+                    total_urgency += max(0, urgency)
         avg_urgency = (total_urgency / num_pending_jobs) if num_pending_jobs > 0 else 0
-
-        # 3. 设置门控，只有在压力大时才允许加班
-        OVERTIME_PRESSURE_THRESHOLD = 0.05  # 阈值：当平均紧急度超过10%时
+        OVERTIME_PRESSURE_THRESHOLD = 0.05
         if avg_urgency > OVERTIME_PRESSURE_THRESHOLD:
             for m in range(self.problem.num_machines):
                 if machine_modes[m] == 'normal':
                     available_actions.append(current_num_jobs + m)
-
-        # 4. 获取外包动作
         if not self._is_terminal(job_ptrs):
             outsourcing_action_index = current_num_jobs + self.problem.num_machines
             available_actions.append(outsourcing_action_index)
-
         return available_actions
 
     def _is_terminal(self, job_ptrs):
@@ -171,8 +173,7 @@ class DQNAgentSolverReplayDynamic(BaseSolver):
     def train_step(self):
         if len(self.buffer) < self.batch_size: return
         states, actions, rewards, next_states, dones = self.buffer.sample(self.batch_size)
-        states = torch.stack(states)
-        next_states = torch.stack(next_states)
+        states, next_states = torch.stack(states), torch.stack(next_states)
         actions = torch.tensor(actions, dtype=torch.int64, device=self.device).view(-1, 1)
         rewards = torch.tensor(rewards, dtype=torch.float32, device=self.device)
         dones = torch.tensor(dones, dtype=torch.float32, device=self.device)
@@ -185,39 +186,71 @@ class DQNAgentSolverReplayDynamic(BaseSolver):
         loss.backward()
         self.optimizer.step()
 
-    def run(self, track_history=True, track_schedule=False):
+    def _advance_time_to_next_event(self, machine_ready):
+        event_times = []
+        future_machine_ready_times = [t for t in machine_ready if t > self.current_time]
+        if future_machine_ready_times:
+            event_times.extend(future_machine_ready_times)
+        future_arrival_times = [e['time'] for e in self.dynamic_events if
+                                e['type'] == 'new_job_arrival' and e.get('time', -1) > self.current_time]
+        if future_arrival_times:
+            event_times.extend(future_arrival_times)
+        if not event_times:
+            return False
+        self.current_time = min(event_times)
+        return True
+
+    def run(self, track_history=True, track_schedule=False, evaluation_mode=False):
         best_solution_schedule, best_score, history = None, float("inf"), []
 
+        if evaluation_mode:
+            print("\n⚙️ 运行在评估模式 (Epsilon=0, 无训练)")
+            self.episodes = 1
+            self.epsilon = 0.0
+
         for ep in range(self.episodes):
-            print(f"DQNAgentSolver (持续性惩罚) - Episode {ep + 1}/{self.episodes}")
+            if not evaluation_mode:
+                print(f"DQNAgentSolver (持续性惩罚) - Episode {ep + 1}/{self.episodes}")
+
             self.problem.jobs = [job for job in self.problem.initial_jobs]
             self.dynamic_events = [e.copy() for e in self.original_dynamic_events]
             self._initialize_problem_parameters()
-            self.epsilon = max(self.epsilon_min, self.epsilon_init * (self.epsilon_decay ** ep))
+            if not evaluation_mode:
+                self.epsilon = max(self.epsilon_min, self.epsilon_init * (self.epsilon_decay ** ep))
+
             self.job_ptrs = [0] * self.num_jobs
-            job_ready = [0] * self.num_jobs
-            machine_ready = [0] * self.problem.num_machines
-            machine_task_counters = [0] * self.problem.num_machines
-            machine_modes = ['normal'] * self.problem.num_machines
+            job_ready, machine_ready = [0] * self.num_jobs, [0] * self.problem.num_machines
+            machine_task_counters, machine_modes = [0] * self.problem.num_machines, [
+                'normal'] * self.problem.num_machines
             self.current_time = 0
             live_schedule = []
+            step_counter = 0
 
             while not self._is_terminal(self.job_ptrs):
+                step_counter += 1
+                if step_counter > self.max_steps:
+                    print(f"   - ⚠️ 警告: 超过最大步数 {self.max_steps}，强制终止回合。")
+                    break
+
                 self._handle_time_based_events(self.job_ptrs, job_ready)
+
                 current_num_jobs = len(self.job_ptrs)
                 machine_status = [1 if machine_ready[m] <= self.current_time else 0 for m in
                                   range(self.problem.num_machines)]
                 state = self._build_state_tensor(self.job_ptrs, job_ready, machine_status)
-
-                # === 【核心修改】确保这里的函数调用是正确的，与上面的定义匹配 ===
                 available_actions = self._get_available_actions(self.job_ptrs, job_ready, machine_status, machine_modes)
 
-                if not any(a < current_num_jobs for a in available_actions) and not self._is_terminal(self.job_ptrs):
-                    ready_times = [t for t in machine_ready if t > self.current_time]
-                    if not ready_times: break
-                    self.current_time = min(ready_times)
+                has_schedulable_job = any(a < current_num_jobs for a in available_actions)
+                if not has_schedulable_job and not self._is_terminal(self.job_ptrs):
+                    if not self._advance_time_to_next_event(machine_ready):
+                        print("   - ⚠️ 警告: 检测到死锁（无可用工件且无未来事件），终止回合。")
+                        break
                     continue
-                if not available_actions: break
+
+                if not available_actions:
+                    if self._is_terminal(self.job_ptrs): break
+                    print("   - ⚠️ 警告: 无任何可用动作，终止回合。")
+                    break
 
                 if random.random() < self.epsilon:
                     action_logic = random.choice(available_actions)
@@ -242,50 +275,36 @@ class DQNAgentSolverReplayDynamic(BaseSolver):
                         action_logic = current_num_jobs + self.problem.num_machines
 
                 reward = 0
-
                 action_for_buffer = -1
                 if action_logic < current_num_jobs:
                     action_for_buffer = action_logic
                 elif current_num_jobs <= action_logic < current_num_jobs + self.problem.num_machines:
-                    machine_idx = action_logic - current_num_jobs
-                    action_for_buffer = self.MAX_JOBS + machine_idx
+                    action_for_buffer = self.MAX_JOBS + (action_logic - current_num_jobs)
                 else:
                     action_for_buffer = self.MAX_JOBS + self.MAX_MACHINES
 
                 if 0 <= action_logic < current_num_jobs:
-                    job_id = action_logic
-                    op_idx = self.job_ptrs[job_id]
+                    job_id, op_idx = action_logic, self.job_ptrs[action_logic]
                     task = self.problem.jobs[job_id].tasks[op_idx]
                     machine, proc_time = task.machine_id, task.duration
-
                     start_time = max(machine_ready[machine], job_ready[job_id])
                     self.current_time = max(self.current_time, start_time)
                     end_time = self.current_time + proc_time
-
                     reward -= proc_time
-                    if machine_modes[machine] == 'overtime':
-                        overtime_penalty = proc_time * self.OVERTIME_PENALTY_PER_UNIT * self.COST_WEIGHT
-                        reward -= overtime_penalty
-
+                    if machine_modes[
+                        machine] == 'overtime': reward -= proc_time * self.OVERTIME_PENALTY_PER_UNIT * self.COST_WEIGHT
                     machine_ready[machine], job_ready[job_id] = end_time, end_time
                     self.job_ptrs[job_id] += 1
-
-                    task_info = {"job": job_id, "operation": op_idx, "machine": machine, "start": start_time,
-                                 "end": end_time, "is_overtime": machine_modes[machine] == 'overtime',
-                                 "is_outsourced": False}
-                    live_schedule.append(task_info)
-
+                    live_schedule.append({"job": job_id, "operation": op_idx, "machine": machine, "start": start_time,
+                                          "end": end_time, "is_overtime": machine_modes[machine] == 'overtime',
+                                          "is_outsourced": False})
                     if self.job_ptrs[job_id] >= self.job_counts[job_id]:
-                        due_date = self.problem.jobs[job_id].due_date
-                        tardiness = max(0, end_time - due_date)
+                        tardiness = max(0, end_time - self.problem.jobs[job_id].due_date)
                         if tardiness > 0:
-                            tardiness_penalty = tardiness * self.TARDINESS_PENALTY * self.COST_WEIGHT
-                            reward -= tardiness_penalty
+                            reward -= tardiness * self.TARDINESS_PENALTY * self.COST_WEIGHT
                         else:
                             reward += self.REWARD_ON_TIME
-
                     self._handle_machine_usage_events(machine, end_time, machine_ready, machine_task_counters)
-
                 elif current_num_jobs <= action_logic < current_num_jobs + self.problem.num_machines:
                     machine_id_to_overtime = action_logic - current_num_jobs
                     if machine_modes[machine_id_to_overtime] == 'normal':
@@ -293,7 +312,8 @@ class DQNAgentSolverReplayDynamic(BaseSolver):
                         reward -= 1.0
                     else:
                         reward -= 5.0
-
+                    # 【BUG FIX】强制重启循环以重新评估状态
+                    continue
                 elif action_logic == current_num_jobs + self.problem.num_machines:
                     job_tardiness_list = [max(0, max(self.current_time, job_ready[j]) + sum(
                         self.problem.jobs[j].tasks[i].duration for i in range(self.job_ptrs[j], self.job_counts[j])) -
@@ -301,59 +321,58 @@ class DQNAgentSolverReplayDynamic(BaseSolver):
                         j] else -1 for j in range(current_num_jobs)]
                     if any(t > 0 for t in job_tardiness_list):
                         job_to_outsource = int(np.argmax(job_tardiness_list))
-                        task_info = {"job": job_to_outsource, "operation": -1, "machine": -1,
-                                     "start": self.current_time, "end": self.current_time + 20, "is_overtime": False,
-                                     "is_outsourced": True}
-                        live_schedule.append(task_info)
+                        live_schedule.append(
+                            {"job": job_to_outsource, "operation": -1, "machine": -1, "start": self.current_time,
+                             "end": self.current_time + 20, "is_overtime": False, "is_outsourced": True})
                         job_ready[job_to_outsource] = max(job_ready[job_to_outsource], self.current_time + 20)
                         self.job_ptrs[job_to_outsource] = self.job_counts[job_to_outsource]
                         reward -= self.OUTSOURCING_COST * self.COST_WEIGHT
                     else:
                         reward -= 10
+                    # 【BUG FIX】强制重启循环以重新评估状态
+                    continue
 
                 next_machine_status = [1 if machine_ready[m] <= self.current_time else 0 for m in
                                        range(self.problem.num_machines)]
                 next_state = self._build_state_tensor(self.job_ptrs, job_ready, next_machine_status)
                 done = self._is_terminal(self.job_ptrs)
 
-                self.buffer.add(state, action_for_buffer, reward, next_state, done)
+                if not evaluation_mode:
+                    self.buffer.add(state, action_for_buffer, reward, next_state, done)
+                    self.train_step()
 
-                self.train_step()
-
-            if ep % self.target_update_freq == 0:
+            if not evaluation_mode and ep % self.target_update_freq == 0:
                 self.target_qnet.load_state_dict(self.qnet.state_dict())
 
             score = max(machine_ready) if machine_ready else 0
 
-            print(f"--- Episode {ep + 1} 结束 ---")
-            print(f"  - 本回合 Score (Makespan): {score:.2f}")
-            print(f"  - 本回合 Schedule 中的工序数量: {len(live_schedule)}")
-            print(f"  - 当前 Best Score: {best_score:.2f}")
+            if not evaluation_mode:
+                print(f"--- Episode {ep + 1} 结束 ---")
+                print(f"  - 本回合 Score (Makespan): {score:.2f}")
+                print(f"  - 当前 Best Score: {best_score:.2f}")
 
-            if score > 0 and score < best_score:
-                print(f"  ✨ 新的最优解被发现！Score 从 {best_score:.2f} 提升到 {score:.2f}.")
-                best_score = score
-                best_solution_schedule = live_schedule[:]
-                print(f"  - best_solution_schedule 已被更新，现在包含 {len(best_solution_schedule)} 个工序。")
-            elif best_solution_schedule is None and score > 0:
-                print(f"  ✨ 找到第一个有效解！Score: {score:.2f}.")
-                best_score = score
-                best_solution_schedule = live_schedule[:]
+            if not evaluation_mode:
+                if score > 0 and score < best_score:
+                    print(f"  ✨ 新的最优解被发现！Score 从 {best_score:.2f} 提升到 {score:.2f}.")
+                    best_score = score
+                    best_solution_schedule = live_schedule[:]
+                    self.best_model_state_dict = self.qnet.state_dict()
+                elif best_solution_schedule is None and score > 0:
+                    print(f"  ✨ 找到第一个有效解！Score: {score:.2f}.")
+                    best_score = score
+                    best_solution_schedule = live_schedule[:]
+                    self.best_model_state_dict = self.qnet.state_dict()
             else:
-                print(f"  - 未找到更优解，Best Score 保持为 {best_score:.2f}.")
+                best_score = score
+                best_solution_schedule = live_schedule[:]
 
-            if track_history:
-                history.append(best_score)
+            if track_history: history.append(best_score)
 
-        print("\n--- 所有回合结束，准备返回最终结果 ---")
+        print("\n--- 所有回合结束 ---")
         if best_solution_schedule:
-            print(f"  ✅ 最终将返回一个有效的调度方案，包含 {len(best_solution_schedule)} 个工序。")
+            print(f"  ✅ 最终将返回一个有效的调度方案，Makespan: {best_score:.2f}")
         else:
-            print(f"  ❌ 最终的 best_solution_schedule 是 None 或空列表！")
+            print(f"  ❌ 未能找到任何有效的调度方案！")
 
-        return {
-            "solution": best_solution_schedule,
-            "makespan": best_score,
-            "history": history,
-            "all_schedules": [best_solution_schedule] if best_solution_schedule else []
-        }
+        return {"solution": best_solution_schedule, "makespan": best_score, "history": history,
+                "all_schedules": [best_solution_schedule] if best_solution_schedule else []}
